@@ -1,0 +1,17 @@
+---
+interface Props {
+  code: string;
+  verbose: string;
+  ra?: string;
+  sql: string;
+}
+
+const { code, ra, sql, verbose } = Astro.props;
+---
+
+<li>
+  <h3>{code}</h3>
+  <q>{verbose}</q>
+  {ra ? <pre class="ra">{ra}</pre> : null}
+  <pre class="sql">{sql}</pre>
+</li>

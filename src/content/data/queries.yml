@@ -1,0 +1,145 @@
+- code: "D1"
+  verbose: "Vyberte všechny zákazníky, kteří neadoptovali žádného živočicha"
+  ra: "adopce!*>zakaznik"
+  sql: "SELECT * FROM Zakaznik WHERE Zakaznik.id_zakaznik NOT IN (SELECT id_zakaznik FROM Adopce);"
+
+- code: "D2"
+  verbose: "Název živočicha, který je kriticky ohrožený"
+  ra: "zivocich(ohrozenost='Critically Endangered')[nazev, raz_nazev]"
+  sql: "SELECT nazev, rad_nazev FROM zivocich WHERE ohrozenost = 'Critically Endangered';"
+
+- code: "D3"
+  verbose: "Zákazníka, který adoptoval \"Humback Whale\""
+  ra: "adopce(nazev='Magnificent frigate bird')[adopce.id_zakaznik = zakaznik.id_zakaznik>zakaznik"
+  sql: |
+    SELECT 
+      zakaznik.* 
+    FROM 
+      zakaznik 
+      JOIN adopce ON (
+        adopce.id_zakaznik = zakaznik.id_zakaznik
+      ) 
+    WHERE 
+      nazev = 'Magnificent frigate bird';
+
+- code: "D4"
+  verbose: "Jména zákazníků, kteří jeli na akci typu 'Diving' a to konkrétně '2.4.2022'"
+  sql: |
+    SELECT 
+      zakaznik.jmeno, 
+      zakaznik.prijmeni 
+    FROM 
+      zakaznik 
+      JOIN zakaznik_akce using (id_zakaznik) 
+      JOIN akce using (id_akce) 
+    WHERE 
+      typ_akce = 'Diving' 
+      AND datum_konani = '2/4/2022';
+
+- code: "D5"
+  verbose: "Seznam živočichů, které nikdo neadoptoval"
+  sql: "SELECT * FROM zivocich EXCEPT SELECT z.* FROM zivocich z JOIN adopce a ON z.nazev = a.nazev;"
+
+- code: "D6"
+  verbose: "Vyberte adopci s největším příspěvkem, s nejnižším příspěvkem a poté celkovou sumu vybranou na adopcích"
+  sql: "SELECT max(castka) FROM adopce; SELECT min(castka) FROM adopce; SELECT sum(castka) FROM adopce;"
+
+- code: "D7"
+  verbose: "Vypište jména všech zaměstnanců a z jaké země pocházejí"
+  sql: "SELECT jmeno, prijmeni, stat FROM adresa JOIN zamestnanec ON adresa.id_adresa=zamestnanec.id_adresa;"
+
+- code: "D11"
+  verbose: "Najděte zákazníka, který byl na akci typu 'Whale watching' nebo na 'Diving', ale ne na obojím"
+  sql: |
+    SELECT 
+      zakaznik.* 
+    FROM 
+      zakaznik 
+      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
+      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+    WHERE 
+      akce.typ_akce = 'Whale watching' 
+    UNION 
+    SELECT 
+      DISTINCT zakaznik.* 
+    FROM 
+      zakaznik 
+      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
+      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+    WHERE 
+      akce.typ_akce = 'Diving' 
+    EXCEPT 
+    SELECT 
+      DISTINCT zakaznik.* 
+    FROM 
+      zakaznik 
+      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
+      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+    WHERE 
+      akce.typ_akce = 'Whale watching' 
+    INTERSECT 
+    SELECT 
+      DISTINCT zakaznik.* 
+    FROM 
+      zakaznik 
+      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
+      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+    WHERE 
+      akce.typ_akce = 'Diving';
+
+- code: "D12"
+  verbose: "Smažte všechny vyhlášky, které byly vydány zaměstnanci, kteří jsou zároveň průvodce"
+  sql: "BEGIN; DELETE FROM vyhlasky WHERE id_zamestnance IN (SELECT id_zamestnance FROM Pruvodce); SELECT id_vyhlasky FROM vyhlasky; ROLLBACK;"
+
+- code: "D15"
+  verbose: "Živočich, kterého nikdo neadoptoval"
+  sql: "SELECT DISTINCT * FROM zivocich WHERE NOT EXISTS (SELECT * FROM adopce WHERE adopce.nazev=zivocich.nazev);"
+
+- code: "D16"
+  verbose: "Přidejte všem průvodcům, kteří alespoň jednou byli na nějaké akci k platu 1000 korun. Poté vypište jméno, příjmení a plat průvodců po úpravě."
+  sql: |
+    BEGIN;
+    UPDATE pruvodce 
+    SET plat = plat + 1000 
+    WHERE 
+      id_pruvodce IN(
+        SELECT 
+          DISTINCT pruvodce.id_pruvodce 
+        FROM 
+          pruvodce 
+          JOIN zamestnanec ON pruvodce.id_zamestnance = zamestnanec.id_zamestnance 
+          JOIN pruvodce_akce ON pruvodce.id_pruvodce = pruvodce_akce.id_pruvodce
+      );
+    SELECT 
+      DISTINCT zamestnanec.jmeno, 
+      zamestnanec.prijmeni, 
+      pruvodce.plat 
+    FROM 
+      pruvodce 
+      JOIN zamestnanec ON pruvodce.id_zamestnance = zamestnanec.id_zamestnance 
+      JOIN pruvodce_akce ON pruvodce.id_pruvodce = pruvodce_akce.id_pruvodce 
+    ORDER BY 
+      pruvodce.plat asc;
+    ROLLBACK;
+- code: "D17"
+  verbose: "Vyber všechny zákazníky, kteří přispěli na adopci více než 8000 korun a vytvoř pro ně speciální kolonku 'stedri_darci'"
+  sql: "create or replace view stedri_darci as select * from zakaznik join adopce using (id_zakaznik) where castka>8000"
+
+- code: "D18"
+  verbose: "Vyber všechny adresy stedrych darcu"
+  sql: "select adresa.* from adresa join stedri_darci using (id_adresa)"
+
+- code: "D19"
+  verbose: "Vypište všechny adopce a všechny zákazníky. Pokud nějaký zákazník adoptoval více živočichů, vypište ho vícekrát a pokud někdo neadoptoval žádného živočicha, vypište u něj, že nic neadoptoval. Poté je seřaďte podle ohroženosti živočicha"
+  sql: |
+    SELECT zakaznik.jmeno, zakaznik.prijmeni, COALESCE(zivocich.nazev,'Nic neadoptoval'), COALESCE(zivocich.ohrozenost, 'Nic neadoptoval') 
+    FROM adopce 
+    FULL OUTER JOIN zakaznik ON adopce.id_zakaznik = zakaznik.id_zakaznik 
+    LEFT JOIN zivocich ON zivocich.nazev = adopce.nazev 
+    ORDER BY CASE 
+        WHEN zivocich.ohrozenost = 'Critically Endangered' THEN 1 
+        WHEN zivocich.ohrozenost = 'Near Threaten' THEN 2 
+        WHEN zivocich.ohrozenost = 'Endangered Species' THEN 3 
+        WHEN zivocich.ohrozenost = 'Vulnerable Species' THEN 4 
+        WHEN zivocich.ohrozenost = 'Nic neadoptoval' THEN 5 
+    END ASC;
