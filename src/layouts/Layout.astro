@@ -1,5 +1,9 @@
 ---
+import "@styles/index.css";
+const BASE_URL = import.meta.env.BASE_URL;
+const font = BASE_URL + "/fonts/firacode.ttf";
 ---
+
 <!doctype html>
 <html lang="en">
 	<head>
@@ -8,27 +12,19 @@
 		<meta name="robots" content="none" />
 		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" type="image/svg+xml" href={BASE_URL + "/favicon.svg"} />
 		<meta name="generator" content={Astro.generator} />
 		<title>"Databse Semestral Project"</title>
+		<style is:global define:vars={{font}}>
+			@font-face {
+				font-family: "Fira Code";
+				src: url("/semestral-db-astro/fonts/firacode.ttf") format("truetype-variations");
+				font-weight: 400;
+				color: black;
+			}
+		</style>
 	</head>
 	<body>
 		<slot />
 	</body>
 </html>
-<style is:global>
-	@font-face {
-		font-family: "Fira Code";
-		src: url("/fonts/firacode.ttf") format("truetype-variations");
-		font-weight: 400 500;
-		color: black;
-	}
-	@page {
-		size: a4 portrait;
-	}
-	:root {
-		font-family: "Fira Code", monospace;
-		font-weight: 400;
-		font-size: 11pt;
-	}
-</style>

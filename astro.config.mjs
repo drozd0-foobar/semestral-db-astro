@@ -6,5 +6,7 @@ export default defineConfig({
   vite: {
     plugins: [yaml()]
   },
+  site: 'https://drozd0-foobar.github.io/',
+  base: '/semestral-db-astro/',
   compressHTML: true,
 });

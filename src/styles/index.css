@@ -1,0 +1,73 @@
+@page {
+  size: a4 portrait;
+}
+:root {
+  font-family: "Fira Code", monospace;
+  font-weight: 400;
+  font-size: 11pt;
+}
+
+h1 {
+  text-align: center;
+}
+
+strong {
+  font-size: 11pt;
+}
+
+body {
+  max-width: 900px;
+  margin: auto;
+  margin-bottom: 20vh;
+  margin-top: 160px;
+}
+
+body > * {
+  padding-left: 2vw;
+  padding-right: 2vw;
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+}
+
+img {
+  max-width: 100%;
+  max-height: 500px;
+  margin: auto;
+  align-self: center;
+}
+
+div, li {
+  page-break-inside: avoid;
+}
+
+th,
+td {
+  text-align: left;
+  padding-left: 1em;
+  padding-right: 1em;
+  vertical-align: top;
+  border: 1pt solid;
+}
+
+td:first-child {
+  text-align: center;
+  font-weight: 600;
+}
+
+table {
+  font-size: 11pt;
+  border-collapse: collapse;
+}
+
+ol {
+  padding: unset;
+}

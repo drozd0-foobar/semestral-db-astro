@@ -2,7 +2,8 @@
 import Layout from "@layouts/Layout.astro";
 import Query from "@components/Query.astro";
 import queries from "@content/data/queries.yml";
-
+import conceptual from "../images/conceptual_schema.png";
+import relational from "../images/relational_schema.jpg";
 ---
 
 <Layout>
@@ -33,7 +34,7 @@ import queries from "@content/data/queries.yml";
 		</div>
 		<div>
 			<h2>Konceptuální schéma</h2>
-			<img alt="Conceptual schema of database" src="conceptual_schema.png" />
+			<img alt="Conceptual schema of database" src={conceptual.src} />
 		</div>
 		<div>
 			<strong>V diagramu jsou dvě smyčky:</strong>
@@ -53,13 +54,15 @@ import queries from "@content/data/queries.yml";
 		</div>
 		<div>
 			<h2>Relační schéma</h2>
-			<img alt="Relational schema of database" src="relational_schema.jpg" />
+			<img alt="Relational schema of database" src={relational.src} />
 		</div>
 		<h2>Dotazy</h2>
 		<ol id="queries">
-			{queries.map((item: any) => {
-					return <Query {...item}/>
-			})}
+			{
+				queries.map((item: any) => {
+					return <Query {...item} />;
+				})
+			}
 		</ol>
 		<div>
 			<h2>SQL Statements Cover</h2>
@@ -204,118 +207,3 @@ import queries from "@content/data/queries.yml";
 		</div>
 	</main>
 </Layout>
-
-<style is:global>
-	h1 {
-		text-align: center;
-	}
-
-	strong {
-		font-size: 11pt;
-	}
-
-	body {
-		max-width: 900px;
-		margin: auto;
-		margin-bottom: 20vh;
-		margin-top: 160px;
-	}
-
-	body > * {
-		padding-left: 2vw;
-		padding-right: 2vw;
-	}
-
-	div {
-		display: flex;
-		flex-direction: column;
-	}
-
-	pre {
-		background-color: #ededed;
-		padding: 0.6em;
-		font-family: "Fira Code";
-		font-size: 11pt;
-		font-weight: 500;
-		border: solid 1pt;
-		white-space: pre-wrap;
-	}
-
-	h1,
-	h2,
-	h3,
-	#queries > li::before {
-		font-weight: 500;
-	}
-
-	ol#queries {
-		list-style: none;
-		counter-reset: counter;
-		margin: 0;
-	}
-
-	#queries li {
-		counter-increment: counter;
-	}
-
-	h3 {
-		margin: 0;
-		display: inline-block;
-	}
-
-	h3,
-	#queries li::before {
-		font-size: 20px;
-		line-height: 2rem;
-		margin-bottom: 0.4em;
-	}
-
-	#queries li::before {
-		content: counter(counter) ".";
-		display: inline-block;
-		text-align: center;
-	}
-
-	q {
-		display: block;
-	}
-
-	img {
-		max-width: 100%;
-		max-height: 500px;
-		margin: auto;
-		align-self: center;
-	}
-
-	div,
-	#queries li {
-		page-break-inside: avoid;
-	}
-
-	th,
-	td {
-		text-align: left;
-		padding-left: 1em;
-		padding-right: 1em;
-		vertical-align: top;
-		border: 1pt solid;
-	}
-
-	td:first-child {
-		text-align: center;
-		font-weight: 500;
-	}
-
-	table {
-		font-size: 11pt;
-		border-collapse: collapse;
-	}
-
-	q::before {
-		content: "";
-	}
-
-	q::after {
-		content: ":";
-	}
-</style>
