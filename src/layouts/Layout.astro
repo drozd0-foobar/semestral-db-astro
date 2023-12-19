@@ -1,7 +1,6 @@
 ---
 import "@styles/index.css";
 const BASE_URL = import.meta.env.BASE_URL;
-const font = BASE_URL + "/fonts/firacode.ttf";
 ---
 
 <!doctype html>
@@ -14,8 +13,8 @@ const font = BASE_URL + "/fonts/firacode.ttf";
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href={BASE_URL + "/favicon.svg"} />
 		<meta name="generator" content={Astro.generator} />
-		<title>"Databse Semestral Project"</title>
-		<style is:global define:vars={{font}}>
+		<title>Database Semestral Project</title>
+		<style is:global>
 			@font-face {
 				font-family: "Fira Code";
 				src: url("/semestral-db-astro/fonts/firacode.ttf") format("truetype-variations");
@@ -25,6 +24,6 @@ const font = BASE_URL + "/fonts/firacode.ttf";
 		</style>
 	</head>
 	<body>
-		<slot />
+		<slot name="main" />
 	</body>
 </html>

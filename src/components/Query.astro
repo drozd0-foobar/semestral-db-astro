@@ -1,4 +1,5 @@
 ---
+import CodeSnippet from './CodeSnippet.astro';
 type Props = {
   code: string;
   verbose: string;
@@ -6,26 +7,25 @@ type Props = {
   sql: string;
 }
 
-const { code, ra, sql, verbose } = Astro.props;
+const { ra, sql, verbose } = Astro.props;
 ---
 
 <li>
-  <h3>{code}</h3>
   <q>{verbose}</q>
-  {ra ? <pre class="ra">{ra}</pre> : null}
-  <pre class="sql">{sql}</pre>
+  {ra ?   <CodeSnippet snippet={ra}/> : null}
+  <CodeSnippet snippet={sql}/>
 </li>
 
 <style>
-  h3,
-  li::before {
+  li::after {
     font-size: 20px;
     line-height: 2rem;
     margin-bottom: 0.4em;
   }
 
   li::before {
-    content: counter(counter) ".";
+    content: "D" counter(counter);
+    font-size: 1.2em;
     display: inline-block;
     text-align: center;
     font-weight: 600;
@@ -34,10 +34,6 @@ const { code, ra, sql, verbose } = Astro.props;
     content: "";
   }
 
-  h3 {
-    margin: 0;
-    display: inline-block;
-  }
 
   q {
     display: block;
@@ -45,6 +41,7 @@ const { code, ra, sql, verbose } = Astro.props;
 
   li {
     counter-increment: counter;
+    margin-bottom: 2em;
   }
   q::before {
     content: "";
@@ -52,14 +49,5 @@ const { code, ra, sql, verbose } = Astro.props;
 
   q::after {
     content: ":";
-  }
-  pre {
-    background-color: #ededed;
-    padding: 0.6em;
-    font-family: "Fira Code", monospace;
-    font-size: 11pt;
-    font-weight: 600;
-    border: solid 1pt;
-    white-space: pre-wrap;
   }
 </style>

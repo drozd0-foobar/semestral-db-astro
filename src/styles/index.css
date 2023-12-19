@@ -71,3 +71,7 @@ table {
 ol {
   padding: unset;
 }
+p {
+  text-align: justify;
+  margin: 0.4em 0;
+}

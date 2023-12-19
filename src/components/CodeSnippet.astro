@@ -1,0 +1,21 @@
+---
+type Props = {
+  snippet: string;
+};
+const { snippet, ...elementProps } = Astro.props;
+---
+
+<pre {...elementProps}>{snippet}</pre>
+
+<style>
+  pre {
+    background-color: #ededed;
+    padding: 0.6em;
+    font-family: "Fira Code", monospace;
+    font-size: 10pt;
+    font-weight: 550;
+    border: solid 1pt;
+    white-space: pre-wrap;
+    margin-top: 0.2em;
+  }
+</style>
