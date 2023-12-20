@@ -1,10 +1,16 @@
 @page {
   size: a4 portrait;
 }
+
 :root {
   font-family: "Fira Code", monospace;
   font-weight: 400;
   font-size: 11pt;
+}
+
+.styled {
+  color: rgb(221, 221, 221);
+  background-color: rgb(56, 57, 49);
 }
 
 h1 {
@@ -22,7 +28,7 @@ body {
   margin-top: 160px;
 }
 
-body > * {
+body>* {
   padding-left: 2vw;
   padding-right: 2vw;
 }
@@ -45,7 +51,8 @@ img {
   align-self: center;
 }
 
-div, li {
+div,
+li {
   page-break-inside: avoid;
 }
 
@@ -58,19 +65,28 @@ td {
   border: 1pt solid;
 }
 
+th {
+  padding: 0.4em;
+}
+
 td:first-child {
   text-align: center;
   font-weight: 600;
+  color: #f92672;
+  border-color: rgb(221, 221, 221);
 }
 
 table {
   font-size: 11pt;
   border-collapse: collapse;
+  padding: 0.2rem;
+  border-radius: 0.65rem;
 }
 
 ol {
   padding: unset;
 }
+
 p {
   text-align: justify;
   margin: 0.4em 0;

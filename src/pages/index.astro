@@ -4,10 +4,7 @@ import Query from "@components/Query.astro";
 import queries from "@content/data/queries.yml";
 import conceptual from "../images/conceptual_schema.png";
 import relational from "../images/relational_schema.jpg";
-import creation from "@content/data/create.yml";
-import CodeSnippet from "@components/CodeSnippet.astro";
 
-console.log(creation)
 ---
 
 <Layout>
@@ -39,8 +36,6 @@ console.log(creation)
 		<div>
 			<h2>Konceptuální schéma</h2>
 			<img loading="lazy" alt="Conceptual schema of database" src={conceptual.src} />
-		</div>
-		<div>
 			<strong>V diagramu jsou dvě smyčky:</strong>
 			<ul>
 				<li>
@@ -60,10 +55,6 @@ console.log(creation)
 			<h2>Relační schéma</h2>
 			<img loading="lazy" alt="Relational schema of database" src={relational.src} />
 		</div>
-		<div>
-			<h2>Tabulkové Schéma</h2>
-			<CodeSnippet snippet={creation}/>
-		</div>
 		<h2>Dotazy</h2>
 		<ol id="queries">
 			{
@@ -74,7 +65,7 @@ console.log(creation)
 		</ol>
 		<div>
 			<h2>SQL Statements Cover</h2>
-			<table>
+			<table class="styled">
 				<tr>
 					<th>Category</th>
 					<th>Category Statement Description</th>

@@ -1,19 +1,20 @@
 ---
-import CodeSnippet from './CodeSnippet.astro';
+import CodeSnippet from "./CodeSnippet.astro";
 type Props = {
   code: string;
   verbose: string;
   ra?: string;
   sql: string;
-}
+};
 
-const { ra, sql, verbose } = Astro.props;
+const { code, ra, sql, verbose } = Astro.props;
 ---
 
 <li>
+  <span>{code}</span>
   <q>{verbose}</q>
-  {ra ?   <CodeSnippet snippet={ra}/> : null}
-  <CodeSnippet snippet={sql}/>
+  {ra ? <CodeSnippet lang="ra" snippet={ra} /> : null}
+  <CodeSnippet lang="sql" snippet={sql} />
 </li>
 
 <style>
@@ -33,7 +34,6 @@ const { ra, sql, verbose } = Astro.props;
   li::marker {
     content: "";
   }
-
 
   q {
     display: block;

@@ -1,5 +1,6 @@
 ---
 import "@styles/index.css";
+import "highlight.js/styles/monokai.css"
 const BASE_URL = import.meta.env.BASE_URL;
 ---
 
@@ -12,12 +13,14 @@ const BASE_URL = import.meta.env.BASE_URL;
 		<meta name="description" content="Astro description" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href={BASE_URL + "/favicon.svg"} />
+
 		<meta name="generator" content={Astro.generator} />
 		<title>Database Semestral Project</title>
 		<style is:global>
 			@font-face {
 				font-family: "Fira Code";
-				src: url("/semestral-db-astro/fonts/firacode.ttf") format("truetype-variations");
+				src: url("/semestral-db-astro/fonts/firacode.ttf")
+					format("truetype-variations");
 				font-weight: 400;
 				color: black;
 			}
@@ -26,4 +29,9 @@ const BASE_URL = import.meta.env.BASE_URL;
 	<body>
 		<slot name="main" />
 	</body>
+	<script type="module">
+		import hljs from "highlight.js/lib/core";
+		import sql from "highlight.js/lib/languages/sql";
+		hljs.registerLanguage("sql", sql);
+	</script>
 </html>

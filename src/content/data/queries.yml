@@ -1,25 +1,64 @@
 %YAML 1.2
 ---
-- verbose: "Vyberte všechny zákazníky, kteří neadoptovali živočicha"
-  ra: "adopce!*>zakaznik"
+
+- verbose: Jména zaměstnanců a jejich města
   sql: |
-    SELECT *
-    FROM Zakaznik
-    WHERE Zakaznik.id_zakaznik NOT IN (SELECT id_zakaznik FROM Adopce);
+    SELECT jmeno, prijmeni, mesto
+    FROM zamestnanec 
+    NATURAL JOIN adresa
 
-- verbose: "Název živočicha, který je kriticky ohrožený"
-  ra: "zivocich(ohrozenost='Critically Endangered')[nazev, raz_nazev]"
-  sql: "SELECT nazev, rad_nazev FROM Zivocich WHERE ohrozenost = 'Critically Endangered';"
+- verbose: Zaměstnanci, kteří nejsou průvodci
+  sql: |
+    SELECT jmeno, prijmeni 
+    FROM zamestnanec z
+    EXCEPT
+    SELECT jmeno, prijmeni
+    FROM zamestnanec z2
+    JOIN pruvodce p ON p.id_pruvodce=z2.id_zamestnance
 
-- verbose: "Zákazníka, který adoptoval \"Magnificent frigate bird\""
-  ra: "adopce(nazev='Magnificent frigate bird')[adopce.id_zakaznik = zakaznik.id_zakaznik>zakaznik"
+- code: A
+  verbose: "Zákazníka, který adoptoval \"Magnificent frigate bird\""
   sql: |
     SELECT Zakaznik.*
     FROM Zakaznik
     JOIN adopce ON (Adopce.id_zakaznik = Zakaznik.id_zakaznik) 
     WHERE nazev = 'Magnificent frigate bird';
 
-- verbose: "Jména zákazníků, kteří jeli na akci typu 'Diving' a to 2.4.2022"
+- code: B G1
+  verbose: "Všichni zákazníci, kteří neadoptovali živočicha"
+  sql: |
+    SELECT *
+    FROM Zakaznik
+    WHERE Zakaznik.id_zakaznik NOT IN (SELECT id_zakaznik FROM Adopce);
+
+- code: C
+  verbose: Živočich, který adoptoval zákazník s číslem 21
+  sql: |
+    SELECT adopce.*
+    FROM adopce
+    JOIN zakaznik ON adopce.id_zakaznik = zakaznik.id_zakaznik
+    WHERE zakaznik.id_zakaznik = 21;  
+
+- code: F1 H2
+  verbose: "Seznam živočichů, které nikdo neadoptoval"
+  sql: |
+    SELECT * FROM zivocich
+    EXCEPT 
+    SELECT zivocich.* 
+    FROM zivocich
+      JOIN adopce ON zivocich.nazev = adopce.nazev;
+
+- code: F1
+  verbose: "Informace o řádu živočicha z adopce číslo 22"
+  sql: |
+    SELECT rad.* 
+    FROM rad 
+      JOIN zivocich ON rad.nazev = zivocich.rad_nazev 
+      JOIN adopce a ON zivocich.nazev = a.nazev 
+    WHERE id_zakaznik=22;
+
+- code: F2
+  verbose: "Jména zákazníků, kteří jeli na akci typu 'Diving' a to 2.4.2022"
   sql: |
     SELECT 
       zakaznik.jmeno, 
@@ -29,57 +68,108 @@
     JOIN akce USING (id_akce) 
     WHERE typ_akce = 'Diving' AND datum_konani = '2/4/2022';
 
-- verbose: "Seznam živočichů, které nikdo neadoptoval"
+
+
+- code: F4 F5
+  verbose: "Všechny adopce a všichni zákaznci. Pokud nějaký zákazník adoptoval více živočichů, je v tabulce vícekrát. Pokud někdo neadoptoval žádného živočicha, je u něj napsané, že nic neadoptoval. Jsou seřazeni podle ohroženosti živočicha"
   sql: |
-    SELECT * FROM zivocich
-    EXCEPT SELECT zivocich.* FROM zivocich
-      JOIN adopce ON zivocich.nazev = adopce.nazev;
+    SELECT 
+      zakaznik.jmeno,
+      zakaznik.prijmeni, 
+      COALESCE(zivocich.nazev,'Nic neadoptoval'),
+      COALESCE(zivocich.ohrozenost, 'Nic neadoptoval') 
+    FROM adopce 
+    FULL OUTER JOIN zakaznik ON adopce.id_zakaznik = zakaznik.id_zakaznik 
+    LEFT JOIN zivocich ON zivocich.nazev = adopce.nazev 
+    ORDER BY CASE 
+        WHEN zivocich.ohrozenost = 'Critically Endangered'  THEN 1 
+        WHEN zivocich.ohrozenost = 'Near Threaten'          THEN 2 
+        WHEN zivocich.ohrozenost = 'Endangered Species'     THEN 3 
+        WHEN zivocich.ohrozenost = 'Vulnerable Species'     THEN 4 
+        WHEN zivocich.ohrozenost = 'Nic neadoptoval'        THEN 5 
+    END ASC;
 
-# check!
-- code: "I1"
-  verbose: "Adopci s největším příspěvkem, s nejnižším příspěvkem a poté celkovou sumu vybranou na adopcích"
-  sql: "SELECT MAX(castka) FROM adopce;"
+- code: I1
+  verbose: Adopci s největším příspěvkem, s nejnižším příspěvkem a poté celkovou sumu vybranou na adopcích
+  sql: SELECT MAX(castka) FROM adopce;
 
-- verbose: "Jména všech zaměstnanců a z jaké země pocházejí"
+- code: I2
+  verbose: "Jméno průvodce a datum poslední akce, na které průvodce byl."
   sql: |
-    SELECT jmeno, prijmeni, stat 
-    FROM adresa
-    JOIN zamestnanec ON adresa.id_adresa=zamestnanec.id_adresa;
+    SELECT 
+    z.jmeno, 
+    z.prijmeni,
+    COALESCE(TO_CHAR(MAX(a.datum_konani), 'dd.mm.yyyy')) AS posledni_akce
+    FROM 
+      pruvodce p 
+      JOIN zamestnanec z ON p.id_zamestnance = z.id_zamestnance 
+      JOIN pruvodce_akce pa ON p.id_zamestnance = pa.id_zamestnance 
+      LEFT JOIN akce a ON pa.id_akce = a.id_akce 
+    GROUP BY 
+      z.jmeno, 
+      z.prijmeni 
+    ORDER BY 
+      posledni_akce;
 
-- verbose: "Zákazník navštívil jednu akci buď 'Whale watching', nebo 'Diving'"
+
+- code: H1 H2 H3
+  verbose: "Zákazník navštívil jednu akci buď 'Whale watching', nebo 'Diving'"
   sql: |
     SELECT zakaznik.* 
     FROM zakaznik 
-      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
-      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+      NATURAL JOIN zakaznik_akce
+      NATURAL JOIN akce
     WHERE akce.typ_akce = 'Whale watching' 
-    UNION SELECT DISTINCT zakaznik.* 
+    UNION 
+    SELECT DISTINCT zakaznik.* 
     FROM zakaznik 
-      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
-      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+      NATURAL JOIN zakaznik_akce
+      NATURAL JOIN akce 
     WHERE akce.typ_akce = 'Diving' 
-    EXCEPT SELECT DISTINCT zakaznik.* 
+    EXCEPT 
+    SELECT DISTINCT zakaznik.* 
     FROM zakaznik 
-      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
-      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+      NATURAL JOIN zakaznik_akce
+      NATURAL JOIN akce 
     WHERE akce.typ_akce = 'Whale watching' 
-    INTERSECT SELECT DISTINCT zakaznik.* 
+    INTERSECT 
+    SELECT DISTINCT zakaznik.* 
     FROM zakaznik
-      JOIN zakaznik_akce ON zakaznik.id_zakaznik = zakaznik_akce.id_zakaznik 
-      JOIN akce ON akce.id_akce = zakaznik_akce.id_akce 
+      NATURAL JOIN zakaznik_akce
+      NATURAL JOIN akce
     WHERE akce.typ_akce = 'Diving';
 
-# check!
-- verbose: "Smažte všechny vyhlášky, které byly vydány zaměstnanci, kteří jsou zároveň průvodce"
+- code: G2
+  verbose: "Všechny typy akce, jejich průměrná cena, počet vykonaných akcí"
   sql: |
-    BEGIN;
-    DELETE FROM vyhlasky
-    WHERE id_zamestnance IN (SELECT id_zamestnance FROM Pruvodce);
-    SELECT id_vyhlasky FROM vyhlasky; 
-    ROLLBACK;
+    SELECT sq.* 
+    FROM (
+      SELECT typ_akce, 
+          COUNT(typ_akce) AS total, 
+         AVG(cena) AS avg_cena 
+      FROM akce 
+    GROUP BY typ_akce
+    ) AS sq;
 
-# check!
-- code: "G4"
+- code: G3
+  verbose: Všichni průvodci na akcích, seřazeno vzestupně podle data akce 
+  sql: |
+    SELECT 
+    z.jmeno, 
+    z.prijmeni, 
+    (
+      SELECT DISTINCT MAX(a.datum_konani) 
+      FROM akce a 
+      WHERE a.id_akce = pa.id_akce
+    ) AS posledni_akce
+    FROM 
+      pruvodce p 
+      JOIN zamestnanec z ON p.id_zamestnance = z.id_zamestnance 
+      JOIN pruvodce_akce pa ON p.id_zamestnance = pa.id_zamestnance 
+    ORDER BY 
+      posledni_akce;
+
+- code: G4
   verbose: "Živočich, kterého nikdo neadoptoval"
   sql: |
     SELECT DISTINCT * FROM zivocich
@@ -88,8 +178,112 @@
       WHERE adopce.nazev=zivocich.nazev
     );
 
-- code: "O"
-  verbose: "Pokud průvodci byli na nějaké akci, jejich plat je o 1500 kč větší. Vypsáno je jméno, příjmení a plat průvodců po úpravě."
+- code: J F3 D1
+  verbose: "Akce, na které byli všichni průvodci"
+  sql: |
+    -->
+      SELECT * FROM akce WHERE NOT EXISTS (
+        SELECT * FROM pruvodce WHERE NOT EXISTS (
+            SELECT * FROM pruvodce_akce WHERE pruvodce_akce.id_akce = akce.id_akce 
+            AND pruvodce.id_pruvodce = pruvodce_akce.id_pruvodce
+        )
+      );
+    -->
+      SELECT * FROM akce WHERE (
+      SELECT COUNT(DISTINCT id_pruvodce) FROM pruvodce_akce WHERE pruvodce_akce.id_akce = akce.id_akce
+      ) = (
+        SELECT COUNT(id_pruvodce) FROM pruvodce
+      );
+    -->
+      WITH seznam_akci AS (
+      SELECT id_akce FROM akce
+      ), pruvodci AS (
+          SELECT id_pruvodce FROM pruvodce
+      ), mozne_akce AS (
+          SELECT * FROM seznam_akci CROSS JOIN pruvodci
+      ), provedene_akce AS (
+          SELECT id_akce, id_pruvodce FROM pruvodce_akce
+      ), neprovedene_akce AS (
+          SELECT * FROM mozne_akce EXCEPT SELECT * FROM provedene_akce
+      ), akce_na_ktere_nebyl_kazdy AS (
+          SELECT id_akce FROM neprovedene_akce
+      ), akce_na_ktere_byl_kazdy AS (
+          SELECT * FROM seznam_akci EXCEPT SELECT * FROM akce_na_ktere_nebyl_kazdy
+      )
+      SELECT * FROM akce_na_ktere_byl_kazdy NATURAL JOIN akce;
+
+- code: D2
+  verbose: Ověření D1
+  sql: |
+    SELECT 
+    pa.id_akce, 
+    COUNT(DISTINCT pa.id_akce) 
+    FROM pruvodce_akce pa
+    WHERE 
+      pa.id_akce IN (
+        SELECT a_sub.id_akce 
+        FROM (
+          SELECT a.id_akce
+          FROM akce a 
+          WHERE NOT EXISTS (
+            SELECT 1
+            FROM pruvodce p 
+            WHERE NOT EXISTS (
+              SELECT 1
+              FROM pruvodce_akce pa2 
+              WHERE pa2.id_akce = a.id_akce 
+              AND pa2.id_pruvodce = p.id_pruvodce
+            )
+          )
+        ) AS a_sub
+      ) 
+    GROUP BY pa.id_akce 
+    HAVING COUNT(DISTINCT pa.id_pruvodce) != (
+        SELECT COUNT(p.id_pruvodce) 
+        FROM pruvodce p
+    )
+
+- code: K
+  verbose: Počet adpocí ze zemí, ve kterých klienti adoptovali Common dolphin
+  sql: |
+    SELECT COUNT(adopce.id_zakaznik) AS adoption_count, adresa.stat
+    FROM adopce
+    NATURAL JOIN zakaznik
+    NATURAL JOIN adresa
+    WHERE adopce.nazev = 'Common dolphin'
+    GROUP BY adresa.stat
+    HAVING COUNT(adopce.id_zakaznik) >= 1
+    ORDER BY adresa.stat ASC;
+
+- code: L
+  verbose: "Všichni zákazníci, kteří přispěli na adopci více než 8000 kč, mají speciální kolonku 'stedri_darci'"
+  sql: |
+    CREATE OR REPLACE VIEW stedri_darci
+    AS SELECT * FROM zakaznik 
+      JOIN adopce USING (id_zakaznik)
+    WHERE castka>8000
+
+- code: M
+  verbose: "Všechny adresy štědrých dárců"
+  sql: SELECT Adresa.* FROM Adresa JOIN stedri_darci USING (id_adresa)
+
+- code: N
+  verbose: Vložená rekonstrukce první akce
+  sql: |
+    BEGIN;
+    INSERT INTO akce (id_akce, typ_akce, cena, datum_konani)
+      SELECT id_akce + (
+        SELECT MAX(id_akce) 
+        FROM akce
+      ),
+      typ_akce, 
+      cena,
+      '1/1/2023'
+    FROM akce; 
+    ROLLBACK;
+
+- code: O
+  verbose: "Pokud průvodci byli na nějaké akci, jejich plat je o 1500 kč větší. Vypsáno je jméno, příjmení a plat průvodců po úpravě"
   sql: |
     BEGIN;
     UPDATE pruvodce 
@@ -114,58 +308,9 @@
     ORDER BY 
       pruvodce.plat asc;
     ROLLBACK;
-    
-# check!
-- code: "L"
-  verbose: "Všichni zákazníci, kteří přispěli na adopci více než 8000 kč, mají speciální kolonku 'stedri_darci'"
-  sql: |
-    CREATE OR REPLACE VIEW stedri_darci
-    AS SELECT * FROM zakaznik 
-      JOIN adopce USING (id_zakaznik)
-    WHERE castka>8000
 
-# check!
-- code: "M"
-  verbose: "Všechny adresy štědrých dárců"
-  sql: "SELECT Adresa.* FROM Adresa JOIN stedri_darci USING (id_adresa)"
-
-- verbose: "Všechny adopce a všichni zákaznci. Pokud nějaký zákazník adoptoval více živočichů, je v tabulce vícekrát. Pokud někdo neadoptoval žádného živočicha, je u něj napsané, že nic neadoptoval. Jsou seřazeni podle ohroženosti živočicha"
-  sql: |
-    SELECT zakaznik.jmeno, zakaznik.prijmeni, 
-      COALESCE(zivocich.nazev,'Nic neadoptoval'),
-      COALESCE(zivocich.ohrozenost, 'Nic neadoptoval') 
-    FROM adopce 
-    FULL OUTER JOIN zakaznik ON adopce.id_zakaznik = zakaznik.id_zakaznik 
-    LEFT JOIN zivocich ON zivocich.nazev = adopce.nazev 
-    ORDER BY CASE 
-        WHEN zivocich.ohrozenost = 'Critically Endangered' THEN 1 
-        WHEN zivocich.ohrozenost = 'Near Threaten' THEN 2 
-        WHEN zivocich.ohrozenost = 'Endangered Species' THEN 3 
-        WHEN zivocich.ohrozenost = 'Vulnerable Species' THEN 4 
-        WHEN zivocich.ohrozenost = 'Nic neadoptoval' THEN 5 
-    END ASC;
-
-- verbose: "Informace o řádu živočicha z adopce číslo 22"
-  sql: |
-    SELECT rad.* 
-    FROM rad 
-      JOIN zivocich ON rad.nazev = zivocich.rad_nazev 
-      JOIN adopce a ON zivocich.nazev = a.nazev 
-    WHERE id_zakaznik=22;
-
-- code: 
-  verbose: "Akce, na které byli všichni průvodci"
-  sql: |
-    SELCET * FROM akce 
-    WHERE NOT EXISTS(
-      SELECT * FROM pruvodce
-      WHERE NOT EXISTS ( 
-        SELECT * FROM pruvodce_akce 
-        WHERE pruvodce_akce.id_akce = akce.id_akce AND pruvodce.id_pruvodce = pruvodce_akce.id_pruvodce
-      )
-    );
-
-- code: "P"
+- code: P
+  verbose: Smazané jsou vyhlášky, které byly vydány zaměstanci, kteří jsou zároveň průvodci
   sql: |
     BEGIN;
     DELETE FROM vyhlasky
@@ -174,18 +319,10 @@
       FROM pruvodce
     ); 
     SELECT id_vyhlasky from vyhlasky;
+    ROLLBACK;
 
-    ROLLBACK;
-- code: "N"
+- verbose: "Jména všech zaměstnanců a z jaké země pocházejí"
   sql: |
-    BEGIN;
-    INSERT INTO akce (id_akce, typ_akce, cena, datum_konani)
-      SELECT id_akce + (
-        SELECT MAX(id_akce) 
-        FROM akce
-      ),
-      typ_akce, 
-      cena,
-      '1/1/2023'
-    FROM akce; 
-    ROLLBACK;
+    SELECT jmeno, prijmeni, stat 
+    FROM adresa
+    JOIN zamestnanec ON adresa.id_adresa=zamestnanec.id_adresa;
