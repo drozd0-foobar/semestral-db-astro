@@ -1,6 +1,3 @@
-%YAML 1.2
----
-|
 CREATE TABLE adopce (
     id_adopce SERIAL NOT NULL,
     id_zakaznik INTEGER NOT NULL,

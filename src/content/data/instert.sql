@@ -1,6 +1,3 @@
-%YAML 1.2
----
-
 insert into Rad (nazev, procentualni_zastoupeni) values ('Gonorynchiforme', 6.45);
 insert into Rad (nazev, procentualni_zastoupeni) values ('Mugilomorpha', 4.47);
 insert into Rad (nazev, procentualni_zastoupeni) values ('Percomorpha', 4.5);

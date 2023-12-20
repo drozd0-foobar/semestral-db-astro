@@ -4,7 +4,6 @@ import Query from "@components/Query.astro";
 import queries from "@content/data/queries.yml";
 import conceptual from "../images/conceptual_schema.png";
 import relational from "../images/relational_schema.jpg";
-
 ---
 
 <Layout>
@@ -35,17 +34,22 @@ import relational from "../images/relational_schema.jpg";
 		</div>
 		<div>
 			<h2>Konceptuální schéma</h2>
-			<img loading="lazy" alt="Conceptual schema of database" src={conceptual.src} />
+			<img
+				loading="lazy"
+				alt="Conceptual schema of database"
+				src={conceptual.src}
+			/>
 			<strong>V diagramu jsou dvě smyčky:</strong>
 			<ul>
 				<li>
 					<strong>Zaměstnanec-Zaměstnanec:</strong>
-					To představuje vztah nadřízeného a podřízeného. Může nastat situace,
+					 To představuje vztah nadřízeného a podřízeného. Může nastat situace,
 					kdy zaměstnanec je svým vlastním nadřízeným.
 				</li>
 				<li>
-					<strong>Zaměstnanec-Průvodce-Akce-Zákazník-Adresa-Zaměstnanec:</strong>
-					Tato smyčka zahrnuje zaměstnance a zákazníka, kteří se současně
+					<strong>Zaměstnanec-Průvodce-Akce-Zákazník-Adresa-Zaměstnanec:</strong
+					>
+					 Tato smyčka zahrnuje zaměstnance a zákazníka, kteří se současně
 					účastní (nebo neúčastní) akce a mají také nějakou adresu. To není
 					problém, protože se jedná o odlišné vazby.
 				</li>
@@ -53,7 +57,11 @@ import relational from "../images/relational_schema.jpg";
 		</div>
 		<div>
 			<h2>Relační schéma</h2>
-			<img loading="lazy" alt="Relational schema of database" src={relational.src} />
+			<img
+				loading="lazy"
+				alt="Relational schema of database"
+				src={relational.src}
+			/>
 		</div>
 		<h2>Dotazy</h2>
 		<ol id="queries">
