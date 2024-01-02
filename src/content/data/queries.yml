@@ -6,6 +6,7 @@
     SELECT jmeno, prijmeni, mesto
     FROM zamestnanec 
     NATURAL JOIN adresa
+  ra: "{ zamestnanec * adresa } [ jmeno, prijmeni, adresa ]"
 
 - verbose: Zaměstnanci, kteří nejsou průvodci
   sql: |
@@ -15,6 +16,11 @@
     SELECT jmeno, prijmeni
     FROM zamestnanec z2
     JOIN pruvodce p ON p.id_pruvodce=z2.id_zamestnance
+  ra: "{zamestnanec - {zamestnanec <* pruvodce }} [ jmeno, prijmeni ]" 
+    
+- verbose: Živočichové, kteří jsou kriticky ohrožený
+  sql: SELECT nazev FROM  zivocich WHERE (ohrozenost='Critically Endangered')
+  ra: zivocich(ohrozenost='Critically Endangered')[nazev]
 
 - code: A
   verbose: "Zákazníka, který adoptoval \"Magnificent frigate bird\""
@@ -23,21 +29,24 @@
     FROM Zakaznik
     JOIN adopce ON (Adopce.id_zakaznik = Zakaznik.id_zakaznik) 
     WHERE nazev = 'Magnificent frigate bird';
+  ra: "adopce(nazev='Magnificent frigate bird')[adopce.id_zakaznik = zakaznik.id_zakaznik>zakaznik"
 
 - code: B G1
   verbose: "Všichni zákazníci, kteří neadoptovali živočicha"
+  ra: adopce!*>zivocich
   sql: |
     SELECT *
     FROM Zakaznik
     WHERE Zakaznik.id_zakaznik NOT IN (SELECT id_zakaznik FROM Adopce);
 
 - code: C
-  verbose: Živočich, který adoptoval zákazník s číslem 21
+  verbose: Živočich, který adoptoval zákazník "Rolf"
   sql: |
     SELECT adopce.*
     FROM adopce
     JOIN zakaznik ON adopce.id_zakaznik = zakaznik.id_zakaznik
-    WHERE zakaznik.id_zakaznik = 21;  
+    WHERE zakaznik.jmeno = "Rolf";  
+  ra: '{ adopce * zakaznik } (zakaznik.jmeno = "Rolf") [adopce.nazev, adopce.jmeno_zivocicha, adopce.id_adopce, adopce.id_zakaznika]'
 
 - code: F1 H2
   verbose: "Seznam živočichů, které nikdo neadoptoval"
@@ -47,6 +56,7 @@
     SELECT zivocich.* 
     FROM zivocich
       JOIN adopce ON zivocich.nazev = adopce.nazev;
+  ra: "zivocich - { zivocich <* adopce} [ zivocich.adopce ]"
 
 - code: F1
   verbose: "Informace o řádu živočicha z adopce číslo 22"
@@ -67,7 +77,6 @@
     JOIN zakaznik_akce USING (id_zakaznik) 
     JOIN akce USING (id_akce) 
     WHERE typ_akce = 'Diving' AND datum_konani = '2/4/2022';
-
 
 
 - code: F4 F5
@@ -177,14 +186,16 @@
       SELECT * FROM adopce 
       WHERE adopce.nazev=zivocich.nazev
     );
+  ra: "adopce!*>zivocich"
 
 - code: J F3 D1
   verbose: "Akce, na které byli všichni průvodci"
+  ra: "{pruvodce_akce[id_akce, id_pruvodce]÷pruvodce[id_pruvodce]}*akce"
   sql: |
     -->
       SELECT * FROM akce WHERE NOT EXISTS (
         SELECT * FROM pruvodce WHERE NOT EXISTS (
-            SELECT * FROM pruvodce_akce WHERE pruvodce_akce.id_akce = akce.id_akce 
+            SELECT * FROM pruvodce_akce WHERE git pruvodce_akce.id_akce = akce.id_akce 
             AND pruvodce.id_pruvodce = pruvodce_akce.id_pruvodce
         )
       );
@@ -326,3 +337,4 @@
     SELECT jmeno, prijmeni, stat 
     FROM adresa
     JOIN zamestnanec ON adresa.id_adresa=zamestnanec.id_adresa;
+  ra: "{ adresa * zamestnanec } ( adresa.id_adresa = zamestnanec.id_adresa ) [ jmeno, prijmeni, stat ]"

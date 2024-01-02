@@ -15,7 +15,7 @@ const { snippet, lang, ...elementProps } = Astro.props;
       </div>
     ) : null
   }
-  <pre class="language-sql" {...elementProps} set:html={hljs.highlight(snippet, {language: lang}).value}/>
+  <pre class="language-sql" {...elementProps} set:html={lang === "ra"? snippet:  hljs.highlight(snippet, {language:  lang}).value}/>
 </div>
 <style>
   div.snippet {
